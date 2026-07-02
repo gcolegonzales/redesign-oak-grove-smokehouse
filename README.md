@@ -40,6 +40,19 @@ frameworks, no external dependencies).
   placeholders marked `<!-- IMG-NEEDED -->`. See
   `assets/photos/DROP-PHOTOS-HERE.md` to swap in real photography.
 
+## SEO / deployment note
+
+On-page SEO is built in: unique `<title>` + meta description, JSON-LD structured
+data (`FoodEstablishment` with the business's real name, phone, address, hours, and
+price range), complete Open Graph + Twitter Card tags, a canonical link, plus
+`robots.txt` and `sitemap.xml` at the repo root.
+
+All absolute URLs use the literal placeholder **`https://REPLACE-WITH-DOMAIN.com/`**
+(canonical, `og:url`, `og:image`, Twitter image, the JSON-LD `url`/`image`, the
+`sitemap.xml` `<loc>`, and the `Sitemap:` line in `robots.txt`). Before deploying,
+do a one-line find-and-replace of `https://REPLACE-WITH-DOMAIN.com/` with the real
+domain across all files, and drop a real share image at `assets/og-image.jpg`.
+
 ## Files
 
 ```
