@@ -259,6 +259,8 @@ img{ max-width:100%; display:block; }
   background:rgba(0,0,0,.22); font-family:var(--font-hand); font-size:1.7rem; color:var(--cream);
 }
 .pull cite{ display:block; margin-top:.5rem; font-family:var(--font-body); font-style:normal; font-size:.85rem; letter-spacing:.03em; color:var(--smoke); }
+.pull cite .cite-link{ color:var(--paprika); border-bottom:1px solid transparent; transition:border-color .25s var(--ease); }
+.pull cite .cite-link:hover{ border-color:var(--paprika); }
 
 /* ============================================================
    SMOKED MEATS — editorial numbered list
