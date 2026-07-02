@@ -47,10 +47,10 @@ data (`FoodEstablishment` with the business's real name, phone, address, hours, 
 price range), complete Open Graph + Twitter Card tags, a canonical link, plus
 `robots.txt` and `sitemap.xml` at the repo root.
 
-All absolute URLs use the literal placeholder **`https://REPLACE-WITH-DOMAIN.com/`**
+All absolute URLs use the literal placeholder **`https://oakgrovesmokehouse.com/`**
 (canonical, `og:url`, `og:image`, Twitter image, the JSON-LD `url`/`image`, the
 `sitemap.xml` `<loc>`, and the `Sitemap:` line in `robots.txt`). Before deploying,
-do a one-line find-and-replace of `https://REPLACE-WITH-DOMAIN.com/` with the real
+do a one-line find-and-replace of `https://oakgrovesmokehouse.com/` with the real
 domain across all files, and drop a real share image at `assets/og-image.jpg`.
 
 ## Files
