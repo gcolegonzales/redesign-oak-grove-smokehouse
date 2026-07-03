@@ -25,24 +25,55 @@
   onScroll();
 
   /* ---- Mobile drawer ---- */
+  // Keep the off-canvas drawer out of the tab order whenever it isn't the
+  // active surface (closed, or desktop width). `inert` also hides it from AT.
+  function setDrawerInert(on) {
+    if (!mobileNav) return;
+    if (on) mobileNav.setAttribute('inert', '');
+    else mobileNav.removeAttribute('inert');
+  }
+  // Start inert — it's closed on load.
+  setDrawerInert(true);
+
+  function focusableInDrawer() {
+    return Array.prototype.slice.call(
+      mobileNav.querySelectorAll('a[href], button:not([disabled])')
+    ).filter(function (el) { return el.offsetParent !== null || el.getClientRects().length; });
+  }
+
   function openMenu() {
     mobileNav.classList.add('open');
     scrim.hidden = false;
     // force reflow so the scrim fade transition runs
     void scrim.offsetWidth;
     scrim.classList.add('show');
+    setDrawerInert(false);
     mobileNav.setAttribute('aria-hidden', 'false');
     toggle.setAttribute('aria-expanded', 'true');
     toggle.setAttribute('aria-label', 'Close menu');
     document.body.classList.add('nav-open');
+    // hide the rest of the page from AT while the drawer owns the screen
+    if (header) header.setAttribute('aria-hidden', 'true');
+    var main = document.getElementById('main');
+    if (main) main.setAttribute('aria-hidden', 'true');
+    // move focus into the drawer
+    var first = focusableInDrawer()[0];
+    if (first) first.focus();
   }
-  function closeMenu() {
+  function closeMenu(returnFocus) {
+    var wasOpen = mobileNav.classList.contains('open');
     mobileNav.classList.remove('open');
     scrim.classList.remove('show');
+    setDrawerInert(true);
     mobileNav.setAttribute('aria-hidden', 'true');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Open menu');
     document.body.classList.remove('nav-open');
+    if (header) header.removeAttribute('aria-hidden');
+    var main = document.getElementById('main');
+    if (main) main.removeAttribute('aria-hidden');
+    // return focus to the toggle so keyboard users aren't stranded
+    if (wasOpen && returnFocus !== false && toggle) toggle.focus();
     // hide scrim after its fade-out so it never blocks taps
     window.setTimeout(function () {
       if (!mobileNav.classList.contains('open')) scrim.hidden = true;
@@ -53,13 +84,37 @@
       if (mobileNav.classList.contains('open')) closeMenu();
       else openMenu();
     });
-    scrim.addEventListener('click', closeMenu);
+    scrim.addEventListener('click', function () { closeMenu(); });
     mobileNav.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', closeMenu);
+      // nav-link tap: close but don't yank focus back to the toggle (let the
+      // in-page target take over)
+      a.addEventListener('click', function () { closeMenu(false); });
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeMenu();
+      if (!mobileNav.classList.contains('open')) return;
+      if (e.key === 'Escape') { closeMenu(); return; }
+      if (e.key === 'Tab') {
+        // trap Tab within the drawer
+        var items = focusableInDrawer();
+        if (!items.length) return;
+        var firstEl = items[0], lastEl = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === firstEl) {
+          e.preventDefault(); lastEl.focus();
+        } else if (!e.shiftKey && document.activeElement === lastEl) {
+          e.preventDefault(); firstEl.focus();
+        } else if (!mobileNav.contains(document.activeElement)) {
+          e.preventDefault(); firstEl.focus();
+        }
+      }
     });
+    // Reset state when crossing the desktop breakpoint so no stale
+    // aria-expanded/open drawer lingers.
+    var mq = window.matchMedia('(min-width: 961px)');
+    var onBreak = function () {
+      if (mq.matches && mobileNav.classList.contains('open')) closeMenu(false);
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onBreak);
+    else if (mq.addListener) mq.addListener(onBreak);
   }
 
   /* ---- Scroll reveal ---- */
