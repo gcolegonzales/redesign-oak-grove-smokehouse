@@ -6,32 +6,54 @@
   var header = document.getElementById('siteHeader');
   var toggle = document.getElementById('navToggle');
   var mobileNav = document.getElementById('mobileNav');
+  var scrim = document.getElementById('navScrim');
 
-  /* ---- Shrink-on-scroll header ---- */
-  var lastScroll = -1;
+  /* ---- Shrink + reveal-on-scroll-up header ---- */
+  var lastScroll = 0;
   function onScroll() {
     var y = window.pageYOffset || document.documentElement.scrollTop;
     if (y > 24) header.classList.add('shrink');
     else header.classList.remove('shrink');
-    lastScroll = y;
+    // Hide on downward scroll past a small threshold; reveal the instant we scroll up.
+    if (y > lastScroll && y > 90) header.classList.add('hidden');
+    else header.classList.remove('hidden');
+    lastScroll = y < 0 ? 0 : y;
   }
   window.addEventListener('scroll', function () {
     window.requestAnimationFrame(onScroll);
   }, { passive: true });
   onScroll();
 
-  /* ---- Mobile menu ---- */
+  /* ---- Mobile drawer ---- */
+  function openMenu() {
+    mobileNav.classList.add('open');
+    scrim.hidden = false;
+    // force reflow so the scrim fade transition runs
+    void scrim.offsetWidth;
+    scrim.classList.add('show');
+    mobileNav.setAttribute('aria-hidden', 'false');
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', 'Close menu');
+    document.body.classList.add('nav-open');
+  }
   function closeMenu() {
     mobileNav.classList.remove('open');
+    scrim.classList.remove('show');
+    mobileNav.setAttribute('aria-hidden', 'true');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Open menu');
+    document.body.classList.remove('nav-open');
+    // hide scrim after its fade-out so it never blocks taps
+    window.setTimeout(function () {
+      if (!mobileNav.classList.contains('open')) scrim.hidden = true;
+    }, 300);
   }
   if (toggle) {
     toggle.addEventListener('click', function () {
-      var open = mobileNav.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      if (mobileNav.classList.contains('open')) closeMenu();
+      else openMenu();
     });
+    scrim.addEventListener('click', closeMenu);
     mobileNav.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', closeMenu);
     });
