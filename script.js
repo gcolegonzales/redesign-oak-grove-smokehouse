@@ -56,9 +56,13 @@
     if (header) header.setAttribute('aria-hidden', 'true');
     var main = document.getElementById('main');
     if (main) main.setAttribute('aria-hidden', 'true');
-    // move focus into the drawer
+    // move focus into the drawer — preventScroll so the browser doesn't scroll
+    // the focused link into view and jump the page (G3)
     var first = focusableInDrawer()[0];
-    if (first) first.focus();
+    if (first) {
+      try { first.focus({ preventScroll: true }); }
+      catch (err) { first.focus(); }
+    }
   }
   function closeMenu(returnFocus) {
     var wasOpen = mobileNav.classList.contains('open');
@@ -73,7 +77,9 @@
     var main = document.getElementById('main');
     if (main) main.removeAttribute('aria-hidden');
     // return focus to the toggle so keyboard users aren't stranded
-    if (wasOpen && returnFocus !== false && toggle) toggle.focus();
+    if (wasOpen && returnFocus !== false && toggle) {
+      try { toggle.focus({ preventScroll: true }); } catch (err) { toggle.focus(); }
+    }
     // hide scrim after its fade-out so it never blocks taps
     window.setTimeout(function () {
       if (!mobileNav.classList.contains('open')) scrim.hidden = true;
